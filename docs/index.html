@@ -119,9 +119,69 @@
             padding: 12px 14px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeInUp 0.4s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-main-content {
+            display: flex;
             gap: 12px;
             align-items: center;
-            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-upcoming {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-soon {
+            background: linear-gradient(90deg, #0a84ff 0%, #5e5ce6 100%);
+        }
+
+        .progress-today {
+            background: linear-gradient(90deg, #34c759 0%, #30d158 100%);
+        }
+
+        .progress-passed {
+            background: linear-gradient(90deg, #8e8e93 0%, #636366 100%);
         }
 
         .list-countdown {
@@ -691,6 +751,51 @@
             };
         }
 
+        function calculateProgress(dateStr) {
+            const daysRemaining = calculateDaysRemaining(dateStr);
+            
+            // For passed events
+            if (daysRemaining < 0) {
+                return { 
+                    percentage: 100, 
+                    class: 'progress-passed' 
+                };
+            }
+            
+            // For today
+            if (daysRemaining === 0) {
+                return { 
+                    percentage: 100, 
+                    class: 'progress-today' 
+                };
+            }
+            
+            // For future events - calculate based on 365 days scale
+            // Events within 7 days show as "soon"
+            if (daysRemaining <= 7) {
+                const percentage = ((7 - daysRemaining) / 7) * 100;
+                return { 
+                    percentage: Math.max(5, percentage), 
+                    class: 'progress-soon' 
+                };
+            }
+            
+            // Events within 365 days
+            if (daysRemaining <= 365) {
+                const percentage = ((365 - daysRemaining) / 365) * 100;
+                return { 
+                    percentage: Math.max(5, percentage), 
+                    class: 'progress-upcoming' 
+                };
+            }
+            
+            // Events over a year away
+            return { 
+                percentage: 5, 
+                class: 'progress-upcoming' 
+            };
+        }
+
         function getTimeTag(dateStr) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -822,24 +927,30 @@
                 const category = event.category || 'work';
                 const categoryClass = `category-${category}`;
                 const timeTag = getTimeTag(event.date);
+                const progress = calculateProgress(event.date);
 
                 return `
                     <div class="list-card">
-                        <div class="list-countdown">
-                            <div class="list-countdown-number">${countdownNumber}</div>
-                            <div class="list-countdown-label">${countdownText}</div>
-                        </div>
-                        <div class="list-content">
-                            <div>
-                                <span class="event-category ${categoryClass}">${category}</span>
-                                <span class="time-tag ${timeTag.class}">${timeTag.text}</span>
+                        <div class="card-main-content">
+                            <div class="list-countdown">
+                                <div class="list-countdown-number">${countdownNumber}</div>
+                                <div class="list-countdown-label">${countdownText}</div>
                             </div>
-                            <div class="list-title">${event.name}</div>
-                            <div class="list-date">${formatDate(event.date)}</div>
+                            <div class="list-content">
+                                <div>
+                                    <span class="event-category ${categoryClass}">${category}</span>
+                                    <span class="time-tag ${timeTag.class}">${timeTag.text}</span>
+                                </div>
+                                <div class="list-title">${event.name}</div>
+                                <div class="list-date">${formatDate(event.date)}</div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" onclick="editEvent(${event.id})">✎</button>
+                                <button class="action-btn delete-btn" onclick="deleteEvent(${event.id})">×</button>
+                            </div>
                         </div>
-                        <div class="action-buttons">
-                            <button class="action-btn edit-btn" onclick="editEvent(${event.id})">✎</button>
-                            <button class="action-btn delete-btn" onclick="deleteEvent(${event.id})">×</button>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar ${progress.class}" style="width: ${progress.percentage}%"></div>
                         </div>
                     </div>
                 `;
