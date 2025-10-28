@@ -45,7 +45,7 @@
             z-index: 1;
             max-width: 600px;
             margin: 0 auto;
-            padding: env(safe-area-inset-top, 20px) 16px 100px 16px;
+            padding: env(safe-area-inset-top, 20px) 16px 20px 16px;
         }
 
         .header {
@@ -71,25 +71,38 @@
         .add-event-btn {
             position: fixed;
             bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 32px);
-            max-width: 568px;
-            padding: 18px;
+            right: calc(50% - 300px + 24px);
+            width: 56px;
+            height: 56px;
+            padding: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 16px;
-            font-size: 17px;
-            font-weight: 600;
+            border-radius: 50%;
+            font-size: 28px;
+            font-weight: 300;
             cursor: pointer;
             box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
             z-index: 100;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 632px) {
+            .add-event-btn {
+                right: 24px;
+            }
         }
 
         .add-event-btn:active {
-            transform: translateX(-50%) scale(0.97);
+            transform: scale(0.9);
+        }
+
+        .add-event-btn:hover {
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+            transform: scale(1.05);
         }
 
         .events-list {
@@ -122,7 +135,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            line-height: 1;
+            line-height: 1.2;
         }
 
         .list-countdown-label {
@@ -130,7 +143,7 @@
             color: rgba(255, 255, 255, 0.6);
             font-weight: 600;
             text-transform: uppercase;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
         .list-content {
@@ -153,6 +166,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
+            margin-right: 6px;
         }
 
         .category-work {
@@ -165,6 +179,59 @@
             background: rgba(94, 92, 230, 0.2);
             color: #5e5ce6;
             border: 1px solid rgba(94, 92, 230, 0.3);
+        }
+
+        .time-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .tag-today {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .tag-thisweek {
+            background: rgba(10, 132, 255, 0.2);
+            color: #0a84ff;
+            border: 1px solid rgba(10, 132, 255, 0.3);
+        }
+
+        .tag-thismonth {
+            background: rgba(191, 90, 242, 0.2);
+            color: #bf5af2;
+            border: 1px solid rgba(191, 90, 242, 0.3);
+        }
+
+        .tag-nextmonth {
+            background: rgba(255, 204, 0, 0.2);
+            color: #ffcc00;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .tag-thisyear {
+            background: rgba(100, 210, 255, 0.2);
+            color: #64d2ff;
+            border: 1px solid rgba(100, 210, 255, 0.3);
+        }
+
+        .tag-nextyear {
+            background: rgba(255, 55, 95, 0.2);
+            color: #ff375f;
+            border: 1px solid rgba(255, 55, 95, 0.3);
+        }
+
+        .tag-passed {
+            background: rgba(142, 142, 147, 0.2);
+            color: #8e8e93;
+            border: 1px solid rgba(142, 142, 147, 0.3);
         }
 
         .list-date {
@@ -451,7 +518,7 @@
     <div class="container">
         <div class="header">
             <h1>Countdown</h1>
-            <p>My upcoming events</p>
+            <p>Your upcoming events</p>
         </div>
 
         <div class="stats-bar" id="statsBar"></div>
@@ -459,7 +526,7 @@
         <div class="events-list" id="eventsList"></div>
     </div>
 
-    <button class="add-event-btn" onclick="openModal()">+ Add Event</button>
+    <button class="add-event-btn" onclick="openModal()">+</button>
 
     <div class="modal" id="modal">
         <div class="modal-content">
@@ -477,7 +544,7 @@
                             💼 Work
                         </button>
                         <button type="button" class="category-option personal" onclick="selectCategory('personal')">
-                           ❤️ Personal
+                            ❤️ Personal
                         </button>
                     </div>
                 </div>
@@ -594,6 +661,85 @@
             return Math.ceil(diff / (1000 * 60 * 60 * 24));
         }
 
+        function formatCountdown(days) {
+            const absDays = Math.abs(days);
+            
+            // If less than or equal to 30 days, show days only
+            if (absDays <= 30) {
+                return {
+                    number: absDays,
+                    label: absDays === 1 ? 'day' : 'days'
+                };
+            }
+            
+            // If more than 30 days, show months and remaining days
+            const months = Math.floor(absDays / 30);
+            const remainingDays = absDays % 30;
+            
+            if (remainingDays === 0) {
+                return {
+                    number: months,
+                    label: months === 1 ? 'month' : 'months'
+                };
+            }
+            
+            return {
+                number: `${months}m ${remainingDays}d`,
+                label: ''
+            };
+        }
+
+        function getTimeTag(dateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const eventDate = new Date(dateStr);
+            eventDate.setHours(0, 0, 0, 0);
+            
+            const daysRemaining = calculateDaysRemaining(dateStr);
+            
+            // Past events
+            if (daysRemaining < 0) {
+                return { text: 'Passed', class: 'tag-passed' };
+            }
+            
+            // Today
+            if (daysRemaining === 0) {
+                return { text: 'Today', class: 'tag-today' };
+            }
+            
+            // This week (1-7 days)
+            if (daysRemaining <= 7) {
+                return { text: 'This Week', class: 'tag-thisweek' };
+            }
+            
+            // This month (same month and year)
+            if (eventDate.getMonth() === today.getMonth() && 
+                eventDate.getFullYear() === today.getFullYear()) {
+                return { text: 'This Month', class: 'tag-thismonth' };
+            }
+            
+            // Next month
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const monthAfterNext = new Date(today.getFullYear(), today.getMonth() + 2, 1);
+            if (eventDate >= nextMonth && eventDate < monthAfterNext) {
+                return { text: 'Next Month', class: 'tag-nextmonth' };
+            }
+            
+            // This year (same year)
+            if (eventDate.getFullYear() === today.getFullYear()) {
+                return { text: 'This Year', class: 'tag-thisyear' };
+            }
+            
+            // Next year
+            if (eventDate.getFullYear() === today.getFullYear() + 1) {
+                return { text: 'Next Year', class: 'tag-nextyear' };
+            }
+            
+            // Future years
+            const yearDiff = eventDate.getFullYear() - today.getFullYear();
+            return { text: `${yearDiff} Years`, class: 'tag-nextyear' };
+        }
+
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', { 
@@ -652,27 +798,40 @@
 
             listContainer.innerHTML = events.map(event => {
                 const daysRemaining = calculateDaysRemaining(event.date);
-                let countdownText = 'days';
+                let countdownText = '';
+                let countdownNumber = '';
 
                 if (daysRemaining < 0) {
-                    countdownText = 'ago';
+                    // Past event
+                    const formatted = formatCountdown(daysRemaining);
+                    countdownNumber = formatted.number;
+                    countdownText = formatted.label ? formatted.label + ' ago' : 'ago';
                 } else if (daysRemaining === 0) {
+                    // Today
+                    countdownNumber = 0;
                     countdownText = 'today';
-                } else if (daysRemaining === 1) {
-                    countdownText = 'day';
+                } else {
+                    // Future event
+                    const formatted = formatCountdown(daysRemaining);
+                    countdownNumber = formatted.number;
+                    countdownText = formatted.label;
                 }
 
                 const category = event.category || 'work';
                 const categoryClass = `category-${category}`;
+                const timeTag = getTimeTag(event.date);
 
                 return `
                     <div class="list-card">
                         <div class="list-countdown">
-                            <div class="list-countdown-number">${Math.abs(daysRemaining)}</div>
+                            <div class="list-countdown-number">${countdownNumber}</div>
                             <div class="list-countdown-label">${countdownText}</div>
                         </div>
                         <div class="list-content">
-                            <span class="event-category ${categoryClass}">${category}</span>
+                            <div>
+                                <span class="event-category ${categoryClass}">${category}</span>
+                                <span class="time-tag ${timeTag.class}">${timeTag.text}</span>
+                            </div>
                             <div class="list-title">${event.name}</div>
                             <div class="list-date">${formatDate(event.date)}</div>
                         </div>
