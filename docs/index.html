@@ -8,808 +8,322 @@
     <meta name="apple-mobile-web-app-title" content="Countdown">
     <title>Event Countdown</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000000;
-            min-height: 100vh;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .background-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 128, 171, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 70%, rgba(138, 180, 248, 0.2) 0%, transparent 50%);
-            z-index: 0;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: env(safe-area-inset-top, 20px) 16px 100px 16px;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 24px;
-            padding-top: 12px;
-        }
-
-        .header h1 {
-            font-size: 34px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            font-size: 15px;
-            opacity: 0.6;
-            font-weight: 400;
-        }
-
-        .view-toggle {
-            display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .view-btn {
-            flex: 1;
-            padding: 10px;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.6);
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .view-btn.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .add-event-btn {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 32px);
-            max-width: 568px;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-            z-index: 100;
-            transition: all 0.3s;
-        }
-
-        .add-event-btn:active {
-            transform: translateX(-50%) scale(0.97);
-        }
-
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .events-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .widget-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-            animation: fadeInUp 0.4s ease-out;
-        }
-
-        .widget-card:active {
-            transform: scale(0.98);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .widget-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .event-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .event-icon {
-            font-size: 32px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-        }
-
-        .delete-btn {
-            background: rgba(255, 59, 48, 0.2);
-            color: #ff3b30;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-
-        .delete-btn:active {
-            background: rgba(255, 59, 48, 0.4);
-            transform: scale(0.9);
-        }
-
-        .event-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 6px;
-            line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .event-date {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        .countdown-display {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .countdown-number {
-            font-size: 48px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            margin-bottom: 4px;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .countdown-label {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 8px;
-        }
-
-        .badge-today {
-            background: rgba(52, 199, 89, 0.2);
-            color: #34c759;
-            border: 1px solid rgba(52, 199, 89, 0.3);
-        }
-
-        .badge-overdue {
-            background: rgba(255, 59, 48, 0.2);
-            color: #ff3b30;
-            border: 1px solid rgba(255, 59, 48, 0.3);
-        }
-
-        .badge-upcoming {
-            background: rgba(10, 132, 255, 0.2);
-            color: #0a84ff;
-            border: 1px solid rgba(10, 132, 255, 0.3);
-        }
-
-        .list-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            animation: fadeInUp 0.4s ease-out;
-        }
-
-        .list-countdown {
-            min-width: 70px;
-            text-align: center;
-        }
-
-        .list-countdown-number {
-            font-size: 36px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-        }
-
-        .list-countdown-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        .list-content {
-            flex: 1;
-        }
-
-        .list-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 4px;
-        }
-
-        .list-date {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .empty-state {
-            text-align: center;
-            color: white;
-            padding: 80px 20px;
-        }
-
-        .empty-state-icon {
-            font-size: 80px;
-            margin-bottom: 16px;
-            opacity: 0.3;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .empty-state-text {
-            font-size: 17px;
-            opacity: 0.5;
-            font-weight: 500;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(40px);
-            border-radius: 24px;
-            padding: 32px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            font-size: 16px;
-            color: white;
-            transition: all 0.3s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
-        }
-
-        .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .emoji-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .emoji-btn:active {
-            transform: scale(0.9);
-        }
-
-        .emoji-btn.selected {
-            background: rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .stats-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 14px;
-            padding: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 800;
-            color: white;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000000; min-height: 100vh; padding: 0; overflow-x: hidden; }
+        .background-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 128, 171, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(138, 180, 248, 0.2) 0%, transparent 50%); z-index: 0; animation: gradientShift 15s ease infinite; }
+        @keyframes gradientShift { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .container { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: env(safe-area-inset-top, 20px) 16px 100px 16px; }
+        .header { text-align: center; color: white; margin-bottom: 24px; padding-top: 12px; }
+        .header h1 { font-size: 34px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .header p { font-size: 15px; opacity: 0.6; font-weight: 400; }
+        .controls { display: flex; gap: 8px; margin-bottom: 12px; }
+        .search-box { flex: 1; padding: 12px 16px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; font-size: 15px; color: white; transition: all 0.3s; }
+        .search-box::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .search-box:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
+        .filter-btn { padding: 10px 16px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.7); cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+        .filter-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
+        .view-toggle { display: flex; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 12px; padding: 4px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .view-btn { flex: 1; padding: 10px; background: transparent; color: rgba(255, 255, 255, 0.6); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .view-btn.active { background: rgba(255, 255, 255, 0.2); color: white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); }
+        .add-event-btn { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 568px; padding: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); z-index: 100; transition: all 0.3s; }
+        .add-event-btn:active { transform: translateX(-50%) scale(0.97); }
+        .events-list { display: flex; flex-direction: column; gap: 12px; }
+        .list-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 16px; padding: 18px; border: 1px solid rgba(255, 255, 255, 0.15); animation: fadeInUp 0.4s ease-out; position: relative; }
+        .list-card.today { animation: pulse 2s ease-in-out infinite; border-color: #34c759; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.6); } 50% { box-shadow: 0 0 0 12px rgba(52, 199, 89, 0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .list-title { font-size: 17px; font-weight: 600; color: white; margin-bottom: 6px; }
+        .event-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .tag { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tag.work { background: rgba(10, 132, 255, 0.2); color: #0a84ff; border: 1px solid rgba(10, 132, 255, 0.3); }
+        .tag.personal { background: rgba(52, 199, 89, 0.2); color: #34c759; border: 1px solid rgba(52, 199, 89, 0.3); }
+        .tag.badge-today { background: rgba(52, 199, 89, 0.2); color: #34c759; border: 1px solid rgba(52, 199, 89, 0.3); }
+        .tag.badge-week { background: rgba(10, 132, 255, 0.2); color: #0a84ff; border: 1px solid rgba(10, 132, 255, 0.3); }
+        .tag.badge-month { background: rgba(175, 82, 222, 0.2); color: #af52de; border: 1px solid rgba(175, 82, 222, 0.3); }
+        .tag.repeat { background: rgba(255, 149, 0, 0.2); color: #ff9500; border: 1px solid rgba(255, 149, 0, 0.3); }
+        .list-date { font-size: 13px; color: rgba(255, 255, 255, 0.5); margin-bottom: 10px; }
+        .event-notes { font-size: 13px; color: rgba(255, 255, 255, 0.6); margin-bottom: 12px; font-style: italic; line-height: 1.4; }
+        .countdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .countdown-display { display: flex; flex-direction: column; }
+        .countdown-text { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+        .countdown-label { font-size: 12px; color: rgba(255, 255, 255, 0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .event-actions { display: flex; gap: 6px; }
+        .action-btn { padding: 6px 12px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; font-size: 12px; font-weight: 600; color: white; cursor: pointer; transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.95); }
+        .action-btn.delete { background: rgba(255, 59, 48, 0.2); color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); }
+        .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 2px; transition: width 0.5s ease; }
+        .stats-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+        .stat-card { flex: 1; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 12px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.15); text-align: center; }
+        .stat-number { font-size: 22px; font-weight: 800; color: white; line-height: 1; margin-bottom: 4px; }
+        .stat-label { font-size: 10px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .empty-state { text-align: center; color: white; padding: 60px 20px; }
+        .empty-state-icon { font-size: 64px; margin-bottom: 12px; opacity: 0.3; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .empty-state-text { font-size: 15px; opacity: 0.5; font-weight: 500; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(40px); border-radius: 20px; padding: 28px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 24px; font-weight: 700; color: white; margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.7); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 14px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; font-size: 15px; color: white; transition: all 0.3s; font-family: inherit; }
+        .form-textarea { min-height: 70px; resize: vertical; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; background: rgba(255, 255, 255, 0.15); border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
+        .form-input::placeholder, .form-textarea::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .form-select { cursor: pointer; }
+        .form-actions { display: flex; gap: 10px; margin-top: 24px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body>
     <div class="background-gradient"></div>
-    
     <div class="container">
         <div class="header">
             <h1>Countdown</h1>
             <p>Your upcoming events</p>
         </div>
-
-        <div class="stats-bar" id="statsBar"></div>
-
-        <div class="view-toggle">
-            <button class="view-btn active" onclick="switchView('grid')">Grid</button>
-            <button class="view-btn" onclick="switchView('list')">List</button>
+        <div class="controls">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search events...">
         </div>
-
-        <div class="events-grid" id="eventsGrid"></div>
-        <div class="events-list" id="eventsList" style="display: none;"></div>
+        <div class="controls">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="work">Work</button>
+            <button class="filter-btn" data-category="personal">Personal</button>
+        </div>
+        <div class="stats-bar" id="statsBar"></div>
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="active">Active</button>
+            <button class="view-btn" data-view="history">History</button>
+        </div>
+        <div class="events-list" id="eventsList"></div>
+        <div class="events-list" id="historyList" style="display: none;"></div>
     </div>
-
-    <button class="add-event-btn" onclick="openModal()">+ Add Event</button>
-
+    <button class="add-event-btn" id="addBtn">+ Add Event</button>
     <div class="modal" id="modal">
         <div class="modal-content">
-            <h2 class="modal-title">New Event</h2>
-            <form onsubmit="addEvent(event)">
-                <div class="form-group">
-                    <label class="form-label">Icon</label>
-                    <div class="emoji-grid">
-                        <button type="button" class="emoji-btn selected" data-emoji="🎉" onclick="selectEmoji(this)">🎉</button>
-                        <button type="button" class="emoji-btn" data-emoji="🎂" onclick="selectEmoji(this)">🎂</button>
-                        <button type="button" class="emoji-btn" data-emoji="✈️" onclick="selectEmoji(this)">✈️</button>
-                        <button type="button" class="emoji-btn" data-emoji="💼" onclick="selectEmoji(this)">💼</button>
-                        <button type="button" class="emoji-btn" data-emoji="🎓" onclick="selectEmoji(this)">🎓</button>
-                        <button type="button" class="emoji-btn" data-emoji="💍" onclick="selectEmoji(this)">💍</button>
-                        <button type="button" class="emoji-btn" data-emoji="🏠" onclick="selectEmoji(this)">🏠</button>
-                        <button type="button" class="emoji-btn" data-emoji="🎸" onclick="selectEmoji(this)">🎸</button>
-                        <button type="button" class="emoji-btn" data-emoji="🏆" onclick="selectEmoji(this)">🏆</button>
-                        <button type="button" class="emoji-btn" data-emoji="❤️" onclick="selectEmoji(this)">❤️</button>
-                        <button type="button" class="emoji-btn" data-emoji="🌟" onclick="selectEmoji(this)">🌟</button>
-                        <button type="button" class="emoji-btn" data-emoji="🎮" onclick="selectEmoji(this)">🎮</button>
-                    </div>
-                </div>
+            <h2 class="modal-title" id="modalTitle">New Event</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
                 <div class="form-group">
                     <label class="form-label">Event Name</label>
-                    <input type="text" class="form-input" id="eventName" placeholder="Birthday Party" required>
+                    <input type="text" class="form-input" id="eventName" placeholder="Enter event name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="eventCategory">
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Date</label>
                     <input type="date" class="form-input" id="eventDate" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Repeat</label>
+                    <select class="form-select" id="eventRepeat">
+                        <option value="none">No Repeat</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea class="form-textarea" id="eventNotes" placeholder="Add description or notes..."></textarea>
+                </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
     </div>
-
     <script>
-        let events = [];
-        let currentView = 'grid';
-        let selectedEmoji = '🎉';
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZSA9PiB7IHNlbGYuc2tpcFdhaXRpbmcoKTsgfSk7IHNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBlID0+IHsgfSk7').catch(() => {}); }
+        let events = [], history = [], currentView = 'active', currentCategory = 'all', searchQuery = '';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            attachEventListeners();
+            checkAndArchive();
+            renderEvents();
+            setInterval(() => { checkAndArchive(); renderEvents(); }, 60000);
+        });
+
+        function attachEventListeners() {
+            document.getElementById('searchBox').addEventListener('input', () => { searchQuery = document.getElementById('searchBox').value.toLowerCase(); renderEvents(); });
+            document.getElementById('addBtn').addEventListener('click', () => openModal());
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('eventForm').addEventListener('submit', saveEvent);
+            document.getElementById('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
+            document.querySelectorAll('[data-category]').forEach(btn => { btn.addEventListener('click', () => { currentCategory = btn.dataset.category; document.querySelectorAll('[data-category]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderEvents(); }); });
+            document.querySelectorAll('[data-view]').forEach(btn => { btn.addEventListener('click', () => switchView(btn.dataset.view)); });
+        }
 
         function loadEvents() {
             const stored = localStorage.getItem('countdownEvents');
-            if (stored) {
-                events = JSON.parse(stored);
-                renderEvents();
-            }
+            const storedHistory = localStorage.getItem('countdownHistory');
+            if (stored) events = JSON.parse(stored);
+            if (storedHistory) history = JSON.parse(storedHistory);
         }
 
-        function saveEvents() {
-            localStorage.setItem('countdownEvents', JSON.stringify(events));
-        }
-
-        function selectEmoji(btn) {
-            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedEmoji = btn.dataset.emoji;
-        }
+        function saveEventsToStorage() { localStorage.setItem('countdownEvents', JSON.stringify(events)); localStorage.setItem('countdownHistory', JSON.stringify(history)); }
 
         function switchView(view) {
             currentView = view;
-            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (view === 'grid') {
-                document.getElementById('eventsGrid').style.display = 'grid';
-                document.getElementById('eventsList').style.display = 'none';
+            document.querySelectorAll('[data-view]').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+            document.getElementById('eventsList').style.display = view === 'active' ? 'flex' : 'none';
+            document.getElementById('historyList').style.display = view === 'history' ? 'flex' : 'none';
+            renderEvents();
+        }
+
+        function openModal(id = null) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            if (id) {
+                const evt = events.find(e => e.id === id);
+                title.textContent = 'Edit Event';
+                document.getElementById('eventId').value = evt.id;
+                document.getElementById('eventName').value = evt.name;
+                document.getElementById('eventCategory').value = evt.category;
+                document.getElementById('eventDate').value = evt.date;
+                document.getElementById('eventRepeat').value = evt.repeat || 'none';
+                document.getElementById('eventNotes').value = evt.notes || '';
             } else {
-                document.getElementById('eventsGrid').style.display = 'none';
-                document.getElementById('eventsList').style.display = 'flex';
+                title.textContent = 'New Event';
+                document.getElementById('eventId').value = '';
+                document.getElementById('eventName').value = '';
+                document.getElementById('eventCategory').value = 'work';
+                document.getElementById('eventDate').value = '';
+                document.getElementById('eventRepeat').value = 'none';
+                document.getElementById('eventNotes').value = '';
             }
-            renderEvents();
-        }
-
-        function openModal() {
-            document.getElementById('modal').classList.add('active');
             document.getElementById('eventDate').min = new Date().toISOString().split('T')[0];
-            selectedEmoji = '🎉';
-            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelector('.emoji-btn').classList.add('selected');
+            modal.classList.add('active');
         }
 
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.getElementById('eventName').value = '';
-            document.getElementById('eventDate').value = '';
-        }
+        function closeModal() { document.getElementById('modal').classList.remove('active'); }
 
-        function addEvent(e) {
+        function saveEvent(e) {
             e.preventDefault();
+            const id = document.getElementById('eventId').value;
             const name = document.getElementById('eventName').value;
+            const category = document.getElementById('eventCategory').value;
             const date = document.getElementById('eventDate').value;
-
-            events.push({
-                id: Date.now(),
-                name: name,
-                date: date,
-                emoji: selectedEmoji
-            });
-
-            saveEvents();
-            renderEvents();
-            closeModal();
+            const repeat = document.getElementById('eventRepeat').value;
+            const notes = document.getElementById('eventNotes').value;
+            if (id) { const index = events.findIndex(e => e.id === parseInt(id)); events[index] = { ...events[index], name, category, date, repeat, notes }; } 
+            else { events.push({ id: Date.now(), name, category, date, repeat, notes, createdDate: date }); }
+            saveEventsToStorage(); renderEvents(); closeModal();
         }
 
-        function deleteEvent(id) {
-            if (confirm('Delete this event?')) {
-                events = events.filter(e => e.id !== id);
-                saveEvents();
-                renderEvents();
+        function deleteEvent(id) { if (confirm('Delete this event?')) { events = events.filter(e => e.id !== id); saveEventsToStorage(); renderEvents(); } }
+
+        function checkAndArchive() {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+            events = events.filter(event => {
+                const eventDate = new Date(event.date); eventDate.setHours(0, 0, 0, 0);
+                if (event.repeat === 'none' && eventDate < yesterday) { history.push({ ...event, completedDate: new Date().toISOString() }); return false; }
+                return true;
+            });
+            saveEventsToStorage();
+        }
+
+        function getNextOccurrence(event) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            let eventDate = new Date(event.date); eventDate.setHours(0, 0, 0, 0);
+            if (event.repeat === 'none') return eventDate;
+            while (eventDate < today) {
+                switch (event.repeat) {
+                    case 'weekly': eventDate.setDate(eventDate.getDate() + 7); break;
+                    case 'monthly': eventDate.setMonth(eventDate.getMonth() + 1); break;
+                    case 'yearly': eventDate.setFullYear(eventDate.getFullYear() + 1); break;
+                }
+            }
+            return eventDate;
+        }
+
+        function calculateTimeRemaining(dateStr, repeat) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const eventDate = getNextOccurrence({ date: dateStr, repeat });
+            const diff = eventDate - today;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            if (days === 0) return { value: 0, unit: 'Today', days: 0, display: 'Today', badge: 'today' };
+            else if (days < 30) {
+                let badge = days <= 7 ? 'week' : '';
+                return { value: days, unit: days === 1 ? 'day' : 'days', days, display: `${days} ${days === 1 ? 'day' : 'days'}`, badge };
+            } else if (days < 365) {
+                const months = Math.floor(days / 30);
+                const remainingDays = days % 30;
+                const display = remainingDays > 0 ? `${months}m ${remainingDays}d` : `${months} ${months === 1 ? 'month' : 'months'}`;
+                const badge = days <= 30 ? 'month' : '';
+                return { value: display, unit: 'remaining', days, display, badge };
+            } else {
+                const years = Math.floor(days / 365);
+                const remainingDays = days % 365;
+                const remainingMonths = Math.floor(remainingDays / 30);
+                const display = `${years}y ${remainingMonths}m`;
+                return { value: display, unit: 'remaining', days, display, badge: '' };
             }
         }
 
-        function calculateDaysRemaining(dateStr) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const eventDate = new Date(dateStr);
-            eventDate.setHours(0, 0, 0, 0);
-            const diff = eventDate - today;
-            return Math.ceil(diff / (1000 * 60 * 60 * 24));
-        }
+        function formatDate(dateStr) { const date = new Date(dateStr); return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
+        function getFilteredEvents() {
+            return events.filter(event => {
+                const matchesSearch = event.name.toLowerCase().includes(searchQuery) || (event.notes && event.notes.toLowerCase().includes(searchQuery));
+                const matchesCategory = currentCategory === 'all' || event.category === currentCategory;
+                return matchesSearch && matchesCategory;
             });
         }
 
         function renderStats() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const totalEvents = events.length;
-            const todayEvents = events.filter(e => calculateDaysRemaining(e.date) === 0).length;
-            const upcomingEvents = events.filter(e => calculateDaysRemaining(e.date) > 0).length;
-
+            const todayEvents = events.filter(e => calculateTimeRemaining(e.date, e.repeat).days === 0).length;
+            const weekEvents = events.filter(e => { const days = calculateTimeRemaining(e.date, e.repeat).days; return days > 0 && days <= 7; }).length;
             const statsBar = document.getElementById('statsBar');
-            if (totalEvents === 0) {
-                statsBar.innerHTML = '';
-                return;
-            }
-
-            statsBar.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${totalEvents}</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${todayEvents}</div>
-                    <div class="stat-label">Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${upcomingEvents}</div>
-                    <div class="stat-label">Upcoming</div>
-                </div>
-            `;
+            if (events.length === 0) { statsBar.innerHTML = ''; return; }
+            statsBar.innerHTML = `<div class="stat-card"><div class="stat-number">${todayEvents}</div><div class="stat-label">Today</div></div><div class="stat-card"><div class="stat-number">${weekEvents}</div><div class="stat-label">This Week</div></div>`;
         }
 
         function renderEvents() {
             renderStats();
-            
-            const gridContainer = document.getElementById('eventsGrid');
-            const listContainer = document.getElementById('eventsList');
-            
-            if (events.length === 0) {
-                const emptyHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <div class="empty-state-text">No events yet<br>Tap below to add your first</div>
-                    </div>
-                `;
-                gridContainer.innerHTML = emptyHTML;
-                listContainer.innerHTML = emptyHTML;
-                return;
-            }
+            if (currentView === 'active') renderActiveEvents();
+            else renderHistoryEvents();
+        }
 
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            // Grid View
-            gridContainer.innerHTML = events.map(event => {
-                const daysRemaining = calculateDaysRemaining(event.date);
-                let badge = '';
-                let countdownText = 'days';
-
-                if (daysRemaining < 0) {
-                    countdownText = 'ago';
-                    badge = '<span class="status-badge badge-overdue">Passed</span>';
-                } else if (daysRemaining === 0) {
-                    countdownText = 'today';
-                    badge = '<span class="status-badge badge-today">Today</span>';
-                } else if (daysRemaining === 1) {
-                    countdownText = 'day';
-                    badge = '<span class="status-badge badge-upcoming">Soon</span>';
-                } else if (daysRemaining <= 7) {
-                    badge = '<span class="status-badge badge-upcoming">This Week</span>';
-                }
-
-                return `
-                    <div class="widget-card">
-                        <div class="widget-glow"></div>
-                        <div class="event-header">
-                            <div class="event-icon">${event.emoji || '🎉'}</div>
-                            <button class="delete-btn" onclick="deleteEvent(${event.id})">×</button>
-                        </div>
-                        <div class="event-title">${event.name}</div>
-                        <div class="event-date">${formatDate(event.date)}</div>
-                        <div class="countdown-display">
-                            <div class="countdown-number">${Math.abs(daysRemaining)}</div>
-                            <div class="countdown-label">${countdownText}</div>
-                        </div>
-                        ${badge}
-                    </div>
-                `;
-            }).join('');
-
-            // List View
-            listContainer.innerHTML = events.map(event => {
-                const daysRemaining = calculateDaysRemaining(event.date);
-                let countdownText = 'days';
-
-                if (daysRemaining < 0) {
-                    countdownText = 'ago';
-                } else if (daysRemaining === 0) {
-                    countdownText = 'today';
-                } else if (daysRemaining === 1) {
-                    countdownText = 'day';
-                }
-
-                return `
-                    <div class="list-card">
-                        <div class="event-icon">${event.emoji || '🎉'}</div>
-                        <div class="list-countdown">
-                            <div class="list-countdown-number">${Math.abs(daysRemaining)}</div>
-                            <div class="list-countdown-label">${countdownText}</div>
-                        </div>
-                        <div class="list-content">
-                            <div class="list-title">${event.name}</div>
-                            <div class="list-date">${formatDate(event.date)}</div>
-                        </div>
-                        <button class="delete-btn" onclick="deleteEvent(${event.id})">×</button>
-                    </div>
-                `;
+        function renderActiveEvents() {
+            let filtered = getFilteredEvents();
+            filtered.sort((a, b) => calculateTimeRemaining(a.date, a.repeat).days - calculateTimeRemaining(b.date, b.repeat).days);
+            const container = document.getElementById('eventsList');
+            if (filtered.length === 0) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No events yet<br>Tap below to add your first</div></div>'; return; }
+            container.innerHTML = filtered.map(event => {
+                const timeInfo = calculateTimeRemaining(event.date, event.repeat);
+                const nextDate = getNextOccurrence(event);
+                const isToday = timeInfo.days === 0;
+                const totalDays = Math.ceil((nextDate - new Date(event.createdDate)) / (1000 * 60 * 60 * 24));
+                const progress = totalDays > 0 ? ((totalDays - timeInfo.days) / totalDays) * 100 : 0;
+                let badges = `<span class="tag ${event.category}">${event.category}</span>`;
+                if (event.repeat !== 'none') badges += '<span class="tag repeat">Repeats</span>';
+                if (timeInfo.badge === 'today') badges += '<span class="tag badge-today">Today</span>';
+                else if (timeInfo.badge === 'week') badges += '<span class="tag badge-week">This Week</span>';
+                else if (timeInfo.badge === 'month') badges += '<span class="tag badge-month">This Month</span>';
+                return `<div class="list-card ${isToday ? 'today' : ''}"><div class="list-title">${event.name}</div><div class="event-meta">${badges}</div><div class="list-date">${formatDate(nextDate)}</div>${event.notes ? `<div class="event-notes">${event.notes}</div>` : ''}<div class="countdown-row"><div class="countdown-display"><div class="countdown-text">${timeInfo.display.split(' ')[0]}</div><div class="countdown-label">${timeInfo.unit}</div></div><div class="event-actions"><button class="action-btn" onclick="openModal(${event.id})">Edit</button><button class="action-btn delete" onclick="deleteEvent(${event.id})">Delete</button></div></div><div class="progress-bar"><div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div></div></div>`;
             }).join('');
         }
 
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') {
-                closeModal();
-            }
-        });
+        function renderHistoryEvents() {
+            const container = document.getElementById('historyList');
+            if (history.length === 0) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📜</div><div class="empty-state-text">No past events</div></div>'; return; }
+            container.innerHTML = history.slice().reverse().map(event => `<div class="list-card"><div class="list-title">${event.name}</div><div class="event-meta"><span class="tag ${event.category}">${event.category}</span></div><div class="list-date">Completed: ${formatDate(event.completedDate)}</div>${event.notes ? `<div class="event-notes">${event.notes}</div>` : ''}</div>`).join('');
+        }
 
-        loadEvents();
-        setInterval(renderEvents, 60000);
-    </script>
-</body>
-</html>
+        window.openModal = openModal;
