@@ -130,6 +130,74 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            position: relative;
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: -12px;
+            left: -14px;
+            right: -14px;
+            bottom: -22px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 14px;
+            z-index: 10;
+        }
+
+        .list-card.menu-open .card-overlay {
+            display: flex;
+        }
+
+        .overlay-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay-btn:active {
+            transform: scale(0.95);
+        }
+
+        .overlay-btn.edit {
+            background: rgba(52, 199, 89, 0.2);
+            border-color: rgba(52, 199, 89, 0.3);
+            color: #34c759;
+        }
+
+        .overlay-btn.delete {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: rgba(255, 59, 48, 0.3);
+            color: #ff3b30;
+        }
+
+        .menu-trigger {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            z-index: 5;
+            transition: all 0.2s;
+        }
+
+        .menu-trigger:active {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .progress-bar-container {
@@ -714,6 +782,26 @@
             }
         }
 
+        function toggleMenu(id, event) {
+            event.stopPropagation();
+            const card = document.querySelector(`[data-event-id="${id}"]`);
+            const allCards = document.querySelectorAll('.list-card');
+            
+            allCards.forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('menu-open');
+                }
+            });
+            
+            card.classList.toggle('menu-open');
+        }
+
+        function closeAllMenus() {
+            document.querySelectorAll('.list-card').forEach(card => {
+                card.classList.remove('menu-open');
+            });
+        }
+
         function calculateDaysRemaining(dateStr) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -930,7 +1018,12 @@
                 const progress = calculateProgress(event.date);
 
                 return `
-                    <div class="list-card">
+                    <div class="list-card" data-event-id="${event.id}">
+                        <button class="menu-trigger" onclick="toggleMenu(${event.id}, event)">⋯</button>
+                        <div class="card-overlay">
+                            <button class="overlay-btn edit" onclick="editEvent(${event.id}); closeAllMenus();">Edit</button>
+                            <button class="overlay-btn delete" onclick="deleteEvent(${event.id}); closeAllMenus();">Delete</button>
+                        </div>
                         <div class="card-main-content">
                             <div class="list-countdown">
                                 <div class="list-countdown-number">${countdownNumber}</div>
@@ -944,10 +1037,6 @@
                                 <div class="list-title">${event.name}</div>
                                 <div class="list-date">${formatDate(event.date)}</div>
                             </div>
-                            <div class="action-buttons">
-                                <button class="action-btn edit-btn" onclick="editEvent(${event.id})">✎</button>
-                                <button class="action-btn delete-btn" onclick="deleteEvent(${event.id})">×</button>
-                            </div>
                         </div>
                         <div class="progress-bar-container">
                             <div class="progress-bar ${progress.class}" style="width: ${progress.percentage}%"></div>
@@ -960,6 +1049,12 @@
         document.getElementById('modal').addEventListener('click', (e) => {
             if (e.target.id === 'modal') {
                 closeModal();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.list-card') && !e.target.closest('.menu-trigger')) {
+                closeAllMenus();
             }
         });
 
