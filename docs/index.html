@@ -205,7 +205,7 @@
             height: 4px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 2px;
-            overflow: hidden;
+            overflow: visible;
             position: relative;
         }
 
@@ -215,6 +215,19 @@
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+        }
+
+        .progress-percentage {
+            position: absolute;
+            right: 0;
+            top: -20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
         }
 
         .progress-bar::after {
@@ -647,8 +660,8 @@
     
     <div class="container">
         <div class="header">
-            <h1>Darshana Countdown</h1>
-            <p>My upcoming events</p>
+            <h1>Countdown</h1>
+            <p>Your upcoming events</p>
         </div>
 
         <div class="stats-bar" id="statsBar"></div>
@@ -668,6 +681,10 @@
                     <input type="text" class="form-input" id="eventName" placeholder="Birthday Party" required>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Start Date (Day 1)</label>
+                    <input type="date" class="form-input" id="startDate" required>
+                </div>
+                <div class="form-group">
                     <label class="form-label">Category</label>
                     <div class="category-selector">
                         <button type="button" class="category-option work selected" onclick="selectCategory('work')">
@@ -679,7 +696,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Date</label>
+                    <label class="form-label">Event Date</label>
                     <input type="date" class="form-input" id="eventDate" required>
                 </div>
                 <div class="form-actions">
@@ -716,7 +733,10 @@
 
         function openModal() {
             document.getElementById('modal').classList.add('active');
-            document.getElementById('eventDate').min = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('startDate').max = today;
+            document.getElementById('eventDate').min = today;
             document.getElementById('modalTitle').textContent = 'New Event';
             document.getElementById('saveBtn').textContent = 'Add';
             document.getElementById('eventId').value = '';
@@ -727,6 +747,7 @@
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
             document.getElementById('eventName').value = '';
+            document.getElementById('startDate').value = '';
             document.getElementById('eventDate').value = '';
             document.getElementById('eventId').value = '';
         }
@@ -737,6 +758,7 @@
 
             document.getElementById('eventId').value = event.id;
             document.getElementById('eventName').value = event.name;
+            document.getElementById('startDate').value = event.startDate || new Date().toISOString().split('T')[0];
             document.getElementById('eventDate').value = event.date;
             document.getElementById('modalTitle').textContent = 'Edit Event';
             document.getElementById('saveBtn').textContent = 'Save';
@@ -749,6 +771,7 @@
             e.preventDefault();
             const id = document.getElementById('eventId').value;
             const name = document.getElementById('eventName').value;
+            const startDate = document.getElementById('startDate').value;
             const date = document.getElementById('eventDate').value;
 
             if (id) {
@@ -756,6 +779,7 @@
                 const index = events.findIndex(e => e.id === parseInt(id));
                 if (index !== -1) {
                     events[index].name = name;
+                    events[index].startDate = startDate;
                     events[index].date = date;
                     events[index].category = selectedCategory;
                 }
@@ -764,6 +788,7 @@
                 events.push({
                     id: Date.now(),
                     name: name,
+                    startDate: startDate,
                     date: date,
                     category: selectedCategory
                 });
@@ -839,48 +864,39 @@
             };
         }
 
-        function calculateProgress(dateStr) {
-            const daysRemaining = calculateDaysRemaining(dateStr);
+        function calculateProgress(startDateStr, eventDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startDate = new Date(startDateStr);
+            startDate.setHours(0, 0, 0, 0);
+            const eventDate = new Date(eventDateStr);
+            eventDate.setHours(0, 0, 0, 0);
             
-            // For passed events
-            if (daysRemaining < 0) {
-                return { 
-                    percentage: 100, 
-                    class: 'progress-passed' 
-                };
+            // Calculate total days from start to event
+            const totalDays = Math.ceil((eventDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Calculate days passed from start to today
+            const daysPassed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Calculate percentage
+            let percentage = 0;
+            if (totalDays > 0) {
+                percentage = Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
             }
             
-            // For today
-            if (daysRemaining === 0) {
-                return { 
-                    percentage: 100, 
-                    class: 'progress-today' 
-                };
+            // Determine color class based on how close to event
+            let colorClass = 'progress-upcoming';
+            if (percentage >= 100) {
+                colorClass = 'progress-passed';
+            } else if (percentage >= 90) {
+                colorClass = 'progress-today';
+            } else if (percentage >= 70) {
+                colorClass = 'progress-soon';
             }
             
-            // For future events - calculate based on 365 days scale
-            // Events within 7 days show as "soon"
-            if (daysRemaining <= 7) {
-                const percentage = ((7 - daysRemaining) / 7) * 100;
-                return { 
-                    percentage: Math.max(5, percentage), 
-                    class: 'progress-soon' 
-                };
-            }
-            
-            // Events within 365 days
-            if (daysRemaining <= 365) {
-                const percentage = ((365 - daysRemaining) / 365) * 100;
-                return { 
-                    percentage: Math.max(5, percentage), 
-                    class: 'progress-upcoming' 
-                };
-            }
-            
-            // Events over a year away
             return { 
-                percentage: 5, 
-                class: 'progress-upcoming' 
+                percentage: Math.round(percentage), 
+                class: colorClass 
             };
         }
 
@@ -1015,7 +1031,8 @@
                 const category = event.category || 'work';
                 const categoryClass = `category-${category}`;
                 const timeTag = getTimeTag(event.date);
-                const progress = calculateProgress(event.date);
+                const startDate = event.startDate || event.date;
+                const progress = calculateProgress(startDate, event.date);
 
                 return `
                     <div class="list-card" data-event-id="${event.id}">
@@ -1040,6 +1057,7 @@
                         </div>
                         <div class="progress-bar-container">
                             <div class="progress-bar ${progress.class}" style="width: ${progress.percentage}%"></div>
+                            <div class="progress-percentage">${progress.percentage}%</div>
                         </div>
                     </div>
                 `;
