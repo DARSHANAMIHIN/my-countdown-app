@@ -126,6 +126,75 @@
             overflow: hidden;
         }
 
+        .list-card.pulse-today {
+            animation: pulseToday 2s ease-in-out infinite;
+            border-color: rgba(52, 199, 89, 0.4);
+            box-shadow: 0 0 20px rgba(52, 199, 89, 0.3);
+        }
+
+        .list-card.pulse-thisweek {
+            animation: pulseThisWeek 3s ease-in-out infinite;
+            border-color: rgba(10, 132, 255, 0.4);
+            box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
+        }
+
+        @keyframes pulseToday {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(52, 199, 89, 0.3),
+                           0 0 40px rgba(52, 199, 89, 0.2);
+                border-color: rgba(52, 199, 89, 0.5);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(52, 199, 89, 0.5),
+                           0 0 60px rgba(52, 199, 89, 0.3),
+                           0 0 80px rgba(52, 199, 89, 0.2);
+                border-color: rgba(52, 199, 89, 0.8);
+            }
+        }
+
+        @keyframes pulseThisWeek {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
+                border-color: rgba(10, 132, 255, 0.3);
+                background: rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(10, 132, 255, 0.4),
+                           0 0 40px rgba(10, 132, 255, 0.2);
+                border-color: rgba(10, 132, 255, 0.6);
+                background: rgba(10, 132, 255, 0.05);
+            }
+        }
+
+        .card-glow-today {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(52, 199, 89, 0.15) 0%, transparent 70%);
+            animation: rotateGlow 4s linear infinite;
+            pointer-events: none;
+        }
+
+        .card-glow-thisweek {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%);
+            animation: rotateGlow 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .card-main-content {
             display: flex;
             gap: 12px;
@@ -653,6 +722,58 @@
             font-weight: 600;
             letter-spacing: 0.3px;
         }
+
+        .filter-section {
+            margin-bottom: 14px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-chip.category-work.active {
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+        }
+
+        .filter-chip.category-personal.active {
+            background: linear-gradient(135deg, #5e5ce6 0%, #4c4ab8 100%);
+            box-shadow: 0 4px 12px rgba(94, 92, 230, 0.4);
+        }
+
+        .filter-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
     </style>
 </head>
 <body>
@@ -661,10 +782,24 @@
     <div class="container">
         <div class="header">
             <h1>Countdown</h1>
-            <p>Your upcoming events</p>
+            <p>My upcoming events</p>
         </div>
 
         <div class="stats-bar" id="statsBar"></div>
+
+        <div class="filter-section">
+            <div class="filter-chips">
+                <div class="filter-chip active" data-filter="all" onclick="applyFilter('all', this)">All</div>
+                <div class="filter-divider"></div>
+                <div class="filter-chip category-work" data-filter="work" onclick="applyFilter('work', this)">Work</div>
+                <div class="filter-chip category-personal" data-filter="personal" onclick="applyFilter('personal', this)">Personal</div>
+                <div class="filter-divider"></div>
+                <div class="filter-chip" data-filter="today" onclick="applyFilter('today', this)">Today</div>
+                <div class="filter-chip" data-filter="thisweek" onclick="applyFilter('thisweek', this)">This Week</div>
+                <div class="filter-chip" data-filter="thismonth" onclick="applyFilter('thismonth', this)">This Month</div>
+                <div class="filter-chip" data-filter="nextyear" onclick="applyFilter('nextyear', this)">Next Year</div>
+            </div>
+        </div>
 
         <div class="events-list" id="eventsList"></div>
     </div>
@@ -710,6 +845,7 @@
     <script>
         let events = [];
         let selectedCategory = 'work';
+        let currentFilter = 'all';
 
         function loadEvents() {
             const stored = localStorage.getItem('countdownEvents');
@@ -721,6 +857,59 @@
 
         function saveEvents() {
             localStorage.setItem('countdownEvents', JSON.stringify(events));
+        }
+
+        function applyFilter(filter, element) {
+            currentFilter = filter;
+            
+            // Update active state
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            renderEvents();
+        }
+
+        function filterEvents(eventsList) {
+            if (currentFilter === 'all') {
+                return eventsList;
+            }
+            
+            return eventsList.filter(event => {
+                const daysRemaining = calculateDaysRemaining(event.date);
+                const category = event.category || 'work';
+                
+                // Category filters
+                if (currentFilter === 'work' || currentFilter === 'personal') {
+                    return category === currentFilter;
+                }
+                
+                // Time-based filters
+                if (currentFilter === 'today') {
+                    return daysRemaining === 0;
+                }
+                
+                if (currentFilter === 'thisweek') {
+                    return daysRemaining > 0 && daysRemaining <= 7;
+                }
+                
+                if (currentFilter === 'thismonth') {
+                    const today = new Date();
+                    const eventDate = new Date(event.date);
+                    return eventDate.getMonth() === today.getMonth() && 
+                           eventDate.getFullYear() === today.getFullYear() &&
+                           daysRemaining > 0;
+                }
+                
+                if (currentFilter === 'nextyear') {
+                    const today = new Date();
+                    const eventDate = new Date(event.date);
+                    return eventDate.getFullYear() === today.getFullYear() + 1;
+                }
+                
+                return true;
+            });
         }
 
         function selectCategory(category) {
@@ -964,28 +1153,34 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            const totalEvents = events.length;
-            const todayEvents = events.filter(e => calculateDaysRemaining(e.date) === 0).length;
-            const upcomingEvents = events.filter(e => calculateDaysRemaining(e.date) > 0).length;
+            const todayCount = events.filter(e => calculateDaysRemaining(e.date) === 0).length;
+            const next7Days = events.filter(e => {
+                const days = calculateDaysRemaining(e.date);
+                return days > 0 && days <= 7;
+            }).length;
+            const next30Days = events.filter(e => {
+                const days = calculateDaysRemaining(e.date);
+                return days > 0 && days <= 30;
+            }).length;
 
             const statsBar = document.getElementById('statsBar');
-            if (totalEvents === 0) {
+            if (events.length === 0) {
                 statsBar.innerHTML = '';
                 return;
             }
 
             statsBar.innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-number">${totalEvents}</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${todayEvents}</div>
+                    <div class="stat-number">${todayCount}</div>
                     <div class="stat-label">Today</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">${upcomingEvents}</div>
-                    <div class="stat-label">Upcoming</div>
+                    <div class="stat-number">${next7Days}</div>
+                    <div class="stat-label">Next 7 Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${next30Days}</div>
+                    <div class="stat-label">Next 30 Days</div>
                 </div>
             `;
         }
@@ -1005,9 +1200,22 @@
                 return;
             }
 
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Apply filters
+            const filteredEvents = filterEvents(events);
+            
+            if (filteredEvents.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">No events match this filter<br>Try a different selection</div>
+                    </div>
+                `;
+                return;
+            }
 
-            listContainer.innerHTML = events.map(event => {
+            filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            listContainer.innerHTML = filteredEvents.map(event => {
                 const daysRemaining = calculateDaysRemaining(event.date);
                 let countdownText = '';
                 let countdownNumber = '';
@@ -1033,9 +1241,21 @@
                 const timeTag = getTimeTag(event.date);
                 const startDate = event.startDate || event.date;
                 const progress = calculateProgress(startDate, event.date);
+                
+                // Determine pulse class
+                let pulseClass = '';
+                let glowElement = '';
+                if (daysRemaining === 0) {
+                    pulseClass = 'pulse-today';
+                    glowElement = '<div class="card-glow-today"></div>';
+                } else if (daysRemaining > 0 && daysRemaining <= 7) {
+                    pulseClass = 'pulse-thisweek';
+                    glowElement = '<div class="card-glow-thisweek"></div>';
+                }
 
                 return `
-                    <div class="list-card" data-event-id="${event.id}">
+                    <div class="list-card ${pulseClass}" data-event-id="${event.id}">
+                        ${glowElement}
                         <button class="menu-trigger" onclick="toggleMenu(${event.id}, event)">⋯</button>
                         <div class="card-overlay">
                             <button class="overlay-btn edit" onclick="editEvent(${event.id}); closeAllMenus();">Edit</button>
