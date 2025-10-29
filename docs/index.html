@@ -128,43 +128,45 @@
 
         .list-card.pulse-today {
             animation: pulseToday 2s ease-in-out infinite;
-            border-color: rgba(52, 199, 89, 0.4);
-            box-shadow: 0 0 20px rgba(52, 199, 89, 0.3);
+            box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4);
         }
 
         .list-card.pulse-thisweek {
             animation: pulseThisWeek 3s ease-in-out infinite;
-            border-color: rgba(10, 132, 255, 0.4);
-            box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
+            box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.3);
         }
 
         @keyframes pulseToday {
             0%, 100% {
                 transform: scale(1);
-                box-shadow: 0 0 20px rgba(52, 199, 89, 0.3),
-                           0 0 40px rgba(52, 199, 89, 0.2);
-                border-color: rgba(52, 199, 89, 0.5);
+                box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7),
+                           0 0 20px 5px rgba(52, 199, 89, 0.3),
+                           inset 0 0 20px rgba(52, 199, 89, 0.1);
+                border-color: rgba(52, 199, 89, 0.6);
             }
             50% {
                 transform: scale(1.02);
-                box-shadow: 0 0 30px rgba(52, 199, 89, 0.5),
-                           0 0 60px rgba(52, 199, 89, 0.3),
-                           0 0 80px rgba(52, 199, 89, 0.2);
-                border-color: rgba(52, 199, 89, 0.8);
+                box-shadow: 0 0 0 8px rgba(52, 199, 89, 0),
+                           0 0 40px 10px rgba(52, 199, 89, 0.6),
+                           inset 0 0 30px rgba(52, 199, 89, 0.2);
+                border-color: rgba(52, 199, 89, 1);
             }
         }
 
         @keyframes pulseThisWeek {
             0%, 100% {
-                box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
-                border-color: rgba(10, 132, 255, 0.3);
+                box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.5),
+                           0 0 15px 3px rgba(10, 132, 255, 0.2),
+                           inset 0 0 15px rgba(10, 132, 255, 0.05);
+                border-color: rgba(10, 132, 255, 0.4);
                 background: rgba(255, 255, 255, 0.1);
             }
             50% {
-                box-shadow: 0 0 25px rgba(10, 132, 255, 0.4),
-                           0 0 40px rgba(10, 132, 255, 0.2);
-                border-color: rgba(10, 132, 255, 0.6);
-                background: rgba(10, 132, 255, 0.05);
+                box-shadow: 0 0 0 6px rgba(10, 132, 255, 0),
+                           0 0 30px 8px rgba(10, 132, 255, 0.5),
+                           inset 0 0 25px rgba(10, 132, 255, 0.15);
+                border-color: rgba(10, 132, 255, 0.8);
+                background: rgba(10, 132, 255, 0.08);
             }
         }
 
@@ -175,7 +177,7 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(52, 199, 89, 0.15) 0%, transparent 70%);
-            animation: rotateGlow 4s linear infinite;
+            animation: rotateGlowSync 4s linear infinite;
             pointer-events: none;
         }
 
@@ -186,11 +188,11 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%);
-            animation: rotateGlow 6s linear infinite;
+            animation: rotateGlowSync 4s linear infinite;
             pointer-events: none;
         }
 
-        @keyframes rotateGlow {
+        @keyframes rotateGlowSync {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
@@ -782,7 +784,7 @@
     <div class="container">
         <div class="header">
             <h1>Countdown</h1>
-            <p>My upcoming events</p>
+            <p>Your upcoming events</p>
         </div>
 
         <div class="stats-bar" id="statsBar"></div>
