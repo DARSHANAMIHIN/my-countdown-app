@@ -53,6 +53,11 @@
             color: white;
             margin-bottom: 16px;
             padding-top: 8px;
+            position: relative;
+        }
+
+        .header-content {
+            text-align: center;
         }
 
         .header h1 {
@@ -66,6 +71,39 @@
             font-size: 14px;
             opacity: 0.6;
             font-weight: 400;
+        }
+
+        .history-btn {
+            position: absolute;
+            top: 8px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .history-badge {
+            background: rgba(255, 149, 0, 0.3);
+            color: #ff9500;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
         }
 
         .add-event-btn {
@@ -103,6 +141,184 @@
         .add-event-btn:hover {
             box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
             transform: scale(1.05);
+        }
+
+        .history-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .history-screen.active {
+            display: block;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .history-header {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: env(safe-area-inset-top, 12px) 12px 12px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .history-title {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .clear-all-btn {
+            background: rgba(255, 59, 48, 0.15);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #ff3b30;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .clear-all-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 59, 48, 0.25);
+        }
+
+        .history-content {
+            padding: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 80px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .history-icon {
+            font-size: 24px;
+            opacity: 0.5;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2px;
+        }
+
+        .history-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .history-days {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .history-delete-btn {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-delete-btn:active {
+            background: rgba(255, 59, 48, 0.3);
+            transform: scale(0.9);
+        }
+
+        .clear-history-btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 59, 48, 0.15);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 12px;
+            color: #ff3b30;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .clear-history-btn:active {
+            transform: scale(0.98);
+            background: rgba(255, 59, 48, 0.25);
         }
 
         .events-list {
@@ -783,8 +999,14 @@
     
     <div class="container">
         <div class="header">
-            <h1>Countdown</h1>
-            <p>Your upcoming events</p>
+            <div class="header-content">
+                <h1>Countdown</h1>
+                <p>Your upcoming events</p>
+            </div>
+            <button class="history-btn" onclick="openHistory()">
+                📚
+                <span class="history-badge" id="historyCount">0</span>
+            </button>
         </div>
 
         <div class="stats-bar" id="statsBar"></div>
@@ -807,6 +1029,18 @@
     </div>
 
     <button class="add-event-btn" onclick="openModal()">+</button>
+
+    <div class="history-screen" id="historyScreen">
+        <div class="background-gradient"></div>
+        <div class="history-header">
+            <button class="back-btn" onclick="closeHistory()">←</button>
+            <div class="history-title">Event History</div>
+            <button class="clear-all-btn" onclick="clearAllHistory()">Clear All</button>
+        </div>
+        <div class="history-content">
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
 
     <div class="modal" id="modal">
         <div class="modal-content">
@@ -846,19 +1080,120 @@
 
     <script>
         let events = [];
+        let historyEvents = [];
         let selectedCategory = 'work';
         let currentFilter = 'all';
 
         function loadEvents() {
             const stored = localStorage.getItem('countdownEvents');
+            const storedHistory = localStorage.getItem('historyEvents');
             if (stored) {
                 events = JSON.parse(stored);
-                renderEvents();
+                // Auto-move passed events to history
+                movePassedEventsToHistory();
             }
+            if (storedHistory) {
+                historyEvents = JSON.parse(storedHistory);
+            }
+            renderEvents();
+            updateHistoryBadge();
         }
 
         function saveEvents() {
             localStorage.setItem('countdownEvents', JSON.stringify(events));
+            localStorage.setItem('historyEvents', JSON.stringify(historyEvents));
+        }
+
+        function movePassedEventsToHistory() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const passedEvents = events.filter(event => {
+                const eventDate = new Date(event.date);
+                eventDate.setHours(0, 0, 0, 0);
+                return eventDate < today;
+            });
+            
+            if (passedEvents.length > 0) {
+                // Add to history
+                historyEvents = [...historyEvents, ...passedEvents];
+                // Remove from active events
+                events = events.filter(event => {
+                    const eventDate = new Date(event.date);
+                    eventDate.setHours(0, 0, 0, 0);
+                    return eventDate >= today;
+                });
+                saveEvents();
+            }
+        }
+
+        function updateHistoryBadge() {
+            document.getElementById('historyCount').textContent = historyEvents.length;
+        }
+
+        function openHistory() {
+            document.getElementById('historyScreen').classList.add('active');
+            renderHistory();
+        }
+
+        function closeHistory() {
+            document.getElementById('historyScreen').classList.remove('active');
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (historyEvents.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">No past events yet<br>Completed events will appear here</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date (most recent first)
+            const sortedHistory = [...historyEvents].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            historyList.innerHTML = sortedHistory.map(event => {
+                const daysAgo = Math.abs(calculateDaysRemaining(event.date));
+                const category = event.category || 'work';
+                
+                return `
+                    <div class="history-card">
+                        <div class="history-icon">✓</div>
+                        <div class="history-info">
+                            <div class="history-name">${event.name}</div>
+                            <div class="history-date">${formatDate(event.date)} • ${category}</div>
+                        </div>
+                        <div class="history-days">${daysAgo}d ago</div>
+                        <button class="history-delete-btn" onclick="deleteHistoryEvent(${event.id})">×</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteHistoryEvent(id) {
+            if (confirm('Delete this event from history?')) {
+                historyEvents = historyEvents.filter(e => e.id !== id);
+                saveEvents();
+                updateHistoryBadge();
+                renderHistory();
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm('Clear all history? This cannot be undone.')) {
+                historyEvents = [];
+                saveEvents();
+                updateHistoryBadge();
+                renderHistory();
+            }
+        }
+
+        function clearHistory() {
+            clearAllHistory();
         }
 
         function applyFilter(filter, element) {
@@ -881,6 +1216,9 @@
             return eventsList.filter(event => {
                 const daysRemaining = calculateDaysRemaining(event.date);
                 const category = event.category || 'work';
+                
+                // Only show future or today events (past events auto-removed)
+                if (daysRemaining < 0) return false;
                 
                 // Category filters
                 if (currentFilter === 'work' || currentFilter === 'personal') {
@@ -1155,6 +1493,7 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
+            // Only count future/today events (past events already moved to history)
             const todayCount = events.filter(e => calculateDaysRemaining(e.date) === 0).length;
             const next7Days = events.filter(e => {
                 const days = calculateDaysRemaining(e.date);
@@ -1188,6 +1527,10 @@
         }
 
         function renderEvents() {
+            // First, move any passed events to history
+            movePassedEventsToHistory();
+            updateHistoryBadge();
+            
             renderStats();
             
             const listContainer = document.getElementById('eventsList');
