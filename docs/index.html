@@ -333,6 +333,11 @@
             box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.3);
         }
 
+        .list-card.pulse-passed {
+            animation: pulsePassed 3s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.3);
+        }
+
         @keyframes pulseToday {
             0%, 100% {
                 transform: scale(1);
@@ -367,6 +372,23 @@
             }
         }
 
+        @keyframes pulsePassed {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4),
+                           0 0 15px 3px rgba(255, 59, 48, 0.2),
+                           inset 0 0 15px rgba(255, 59, 48, 0.05);
+                border-color: rgba(255, 59, 48, 0.4);
+                background: rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(255, 59, 48, 0),
+                           0 0 30px 8px rgba(255, 59, 48, 0.5),
+                           inset 0 0 25px rgba(255, 59, 48, 0.15);
+                border-color: rgba(255, 59, 48, 0.8);
+                background: rgba(255, 59, 48, 0.08);
+            }
+        }
+
         .card-glow-today {
             position: absolute;
             top: -50%;
@@ -385,6 +407,17 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%);
+            animation: rotateGlowSync 4s linear infinite;
+            pointer-events: none;
+        }
+
+        .card-glow-passed {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 59, 48, 0.1) 0%, transparent 70%);
             animation: rotateGlowSync 4s linear infinite;
             pointer-events: none;
         }
@@ -450,6 +483,12 @@
             color: #ff3b30;
         }
 
+        .overlay-btn.complete {
+            background: rgba(255, 149, 0, 0.2);
+            border-color: rgba(255, 149, 0, 0.3);
+            color: #ff9500;
+        }
+
         .menu-trigger {
             position: absolute;
             top: 8px;
@@ -466,6 +505,28 @@
 
         .menu-trigger:active {
             color: rgba(255, 255, 255, 0.6);
+        }
+
+        .complete-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(255, 149, 0, 0.2);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #ff9500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 5;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .progress-bar-container {
@@ -530,7 +591,7 @@
         }
 
         .progress-passed {
-            background: linear-gradient(90deg, #8e8e93 0%, #636366 100%);
+            background: linear-gradient(90deg, #ff3b30 0%, #ff453a 100%);
         }
 
         .list-countdown {
@@ -546,6 +607,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             line-height: 1.1;
+        }
+
+        .list-countdown-number.passed {
+            background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .list-countdown-label {
@@ -640,9 +708,9 @@
         }
 
         .tag-passed {
-            background: rgba(142, 142, 147, 0.2);
-            color: #8e8e93;
-            border: 1px solid rgba(142, 142, 147, 0.3);
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
         }
 
         .list-date {
@@ -827,95 +895,3 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .stats-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .stat-card {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            padding: 10px 8px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 20px;
-            font-weight: 800;
-            color: white;
-            line-height: 1;
-            margin-bottom: 3px;
-        }
-
-        .stat-label {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-
-        .filter-section {
-            margin-bottom: 14px;
-        }
-
-        .filter-chips {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .filter-chip {
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .filter-chip:active {
-            transform: scale(0.95);
-        }
-
-        .filter-chip.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .filter-chip.category-work.active {
-            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
-        }
-
-        .filter-chip.category-personal.active {
-            background: linear
