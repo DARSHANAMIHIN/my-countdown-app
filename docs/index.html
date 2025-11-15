@@ -8,76 +8,971 @@
     <meta name="apple-mobile-web-app-title" content="Countdown">
     <title>Event Countdown</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000000; min-height: 100vh; padding: 0; overflow-x: hidden; }
-        .background-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 128, 171, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 70%, rgba(138, 180, 248, 0.2) 0%, transparent 50%); z-index: 0; animation: gradientShift 15s ease infinite; }
-        @keyframes gradientShift { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
-        .container { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: env(safe-area-inset-top, 12px) 12px 20px 12px; }
-        .header { text-align: center; color: white; margin-bottom: 16px; padding-top: 8px; position: relative; }
-        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.5px; }
-        .header p { font-size: 14px; opacity: 0.6; font-weight: 400; }
-        .history-btn { position: absolute; top: 8px; right: 0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 12px; color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
-        .history-badge { background: rgba(255, 149, 0, 0.3); color: #ff9500; border-radius: 10px; padding: 2px 6px; font-size: 10px; font-weight: 700; }
-        .add-event-btn { position: fixed; bottom: 20px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); z-index: 100; transition: all 0.3s; }
-        .events-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 80px; }
-        .list-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 14px; padding: 12px 14px; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; gap: 12px; align-items: center; animation: fadeInUp 0.4s ease-out; position: relative; }
-        .list-card.passed { border-color: rgba(255, 59, 48, 0.4); background: rgba(255, 59, 48, 0.05); }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .list-countdown { min-width: 60px; text-align: center; }
-        .list-countdown-number { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.1; }
-        .list-countdown-number.passed { background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .list-countdown-label { font-size: 9px; color: rgba(255, 255, 255, 0.6); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-        .list-content { flex: 1; }
-        .list-title { font-size: 15px; font-weight: 600; color: white; margin-bottom: 4px; }
-        .list-date { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
-        .action-btn { padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; font-size: 12px; font-weight: 600; color: white; cursor: pointer; }
-        .action-btn.complete { background: rgba(255, 149, 0, 0.2); border-color: rgba(255, 149, 0, 0.3); color: #ff9500; }
-        .empty-state { text-align: center; color: white; padding: 80px 20px; }
-        .empty-state-icon { font-size: 80px; margin-bottom: 16px; opacity: 0.3; }
-        .empty-state-text { font-size: 17px; opacity: 0.5; font-weight: 500; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal-content { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(40px); border-radius: 24px; padding: 32px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .modal-title { font-size: 28px; font-weight: 700; color: white; margin-bottom: 24px; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.7); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-input { width: 100%; padding: 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 16px; color: white; }
-        .form-input:focus { outline: none; border-color: #667eea; }
-        .form-actions { display: flex; gap: 12px; margin-top: 28px; }
-        .btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .history-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 2000; display: none; overflow-y: auto; }
-        .history-screen.active { display: block; }
-        .history-header { position: sticky; top: 0; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px); padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); z-index: 10; display: flex; align-items: center; justify-content: space-between; }
-        .back-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 12px; color: white; font-size: 18px; cursor: pointer; }
-        .history-title { flex: 1; text-align: center; font-size: 20px; font-weight: 700; color: white; }
-        .history-content { padding: 12px; max-width: 600px; margin: 0 auto; }
-        .history-list { display: flex; flex-direction: column; gap: 8px; }
-        .history-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); border-radius: 12px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 10px; align-items: center; }
-        .history-info { flex: 1; }
-        .history-name { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.9); }
-        .history-date { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 128, 171, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 70%, rgba(138, 180, 248, 0.2) 0%, transparent 50%);
+            z-index: 0;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top, 12px) 12px 20px 12px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 16px;
+            padding-top: 8px;
+            position: relative;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.6;
+            font-weight: 400;
+        }
+
+        .history-btn {
+            position: absolute;
+            top: 8px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .history-badge {
+            background: rgba(255, 149, 0, 0.3);
+            color: #ff9500;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .add-event-btn {
+            position: fixed;
+            bottom: 20px;
+            right: calc(50% - 300px + 20px);
+            width: 52px;
+            height: 52px;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 26px;
+            font-weight: 300;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            z-index: 100;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 632px) {
+            .add-event-btn {
+                right: 20px;
+            }
+        }
+
+        .add-event-btn:active {
+            transform: scale(0.9);
+        }
+
+        .add-event-btn:hover {
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+            transform: scale(1.05);
+        }
+
+        .history-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .history-screen.active {
+            display: block;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .history-header {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: env(safe-area-inset-top, 12px) 12px 12px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .history-title {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .clear-all-btn {
+            background: rgba(255, 59, 48, 0.15);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #ff3b30;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .clear-all-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 59, 48, 0.25);
+        }
+
+        .history-content {
+            padding: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 80px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .history-icon {
+            font-size: 24px;
+            opacity: 0.5;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2px;
+        }
+
+        .history-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .history-days {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .history-delete-btn {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-delete-btn:active {
+            background: rgba(255, 59, 48, 0.3);
+            transform: scale(0.9);
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 80px;
+        }
+
+        .list-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeInUp 0.4s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .list-card.pulse-today {
+            animation: pulseToday 2s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4);
+        }
+
+        .list-card.pulse-thisweek {
+            animation: pulseThisWeek 3s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.3);
+        }
+
+        @keyframes pulseToday {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7),
+                           0 0 20px 5px rgba(52, 199, 89, 0.3),
+                           inset 0 0 20px rgba(52, 199, 89, 0.1);
+                border-color: rgba(52, 199, 89, 0.6);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(52, 199, 89, 0),
+                           0 0 40px 10px rgba(52, 199, 89, 0.6),
+                           inset 0 0 30px rgba(52, 199, 89, 0.2);
+                border-color: rgba(52, 199, 89, 1);
+            }
+        }
+
+        @keyframes pulseThisWeek {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.5),
+                           0 0 15px 3px rgba(10, 132, 255, 0.2),
+                           inset 0 0 15px rgba(10, 132, 255, 0.05);
+                border-color: rgba(10, 132, 255, 0.4);
+                background: rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(10, 132, 255, 0),
+                           0 0 30px 8px rgba(10, 132, 255, 0.5),
+                           inset 0 0 25px rgba(10, 132, 255, 0.15);
+                border-color: rgba(10, 132, 255, 0.8);
+                background: rgba(10, 132, 255, 0.08);
+            }
+        }
+
+        .card-glow-today {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(52, 199, 89, 0.15) 0%, transparent 70%);
+            animation: rotateGlowSync 4s linear infinite;
+            pointer-events: none;
+        }
+
+        .card-glow-thisweek {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(10, 132, 255, 0.1) 0%, transparent 70%);
+            animation: rotateGlowSync 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGlowSync {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .card-main-content {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: -12px;
+            left: -14px;
+            right: -14px;
+            bottom: -22px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 14px;
+            z-index: 10;
+        }
+
+        .list-card.menu-open .card-overlay {
+            display: flex;
+        }
+
+        .overlay-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay-btn:active {
+            transform: scale(0.95);
+        }
+
+        .overlay-btn.edit {
+            background: rgba(52, 199, 89, 0.2);
+            border-color: rgba(52, 199, 89, 0.3);
+            color: #34c759;
+        }
+
+        .overlay-btn.delete {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: rgba(255, 59, 48, 0.3);
+            color: #ff3b30;
+        }
+
+        .menu-trigger {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            z-index: 5;
+            transition: all 0.2s;
+        }
+
+        .menu-trigger:active {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: visible;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-percentage {
+            position: absolute;
+            right: 0;
+            top: -20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-upcoming {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-soon {
+            background: linear-gradient(90deg, #0a84ff 0%, #5e5ce6 100%);
+        }
+
+        .progress-today {
+            background: linear-gradient(90deg, #34c759 0%, #30d158 100%);
+        }
+
+        .progress-passed {
+            background: linear-gradient(90deg, #8e8e93 0%, #636366 100%);
+        }
+
+        .list-countdown {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .list-countdown-number {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .list-countdown-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .list-content {
+            flex: 1;
+        }
+
+        .list-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .event-category {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+            margin-right: 4px;
+        }
+
+        .category-work {
+            background: rgba(255, 149, 0, 0.2);
+            color: #ff9500;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        .category-personal {
+            background: rgba(94, 92, 230, 0.2);
+            color: #5e5ce6;
+            border: 1px solid rgba(94, 92, 230, 0.3);
+        }
+
+        .time-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+
+        .tag-today {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .tag-thisweek {
+            background: rgba(10, 132, 255, 0.2);
+            color: #0a84ff;
+            border: 1px solid rgba(10, 132, 255, 0.3);
+        }
+
+        .tag-thismonth {
+            background: rgba(191, 90, 242, 0.2);
+            color: #bf5af2;
+            border: 1px solid rgba(191, 90, 242, 0.3);
+        }
+
+        .tag-nextmonth {
+            background: rgba(255, 204, 0, 0.2);
+            color: #ffcc00;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .tag-thisyear {
+            background: rgba(100, 210, 255, 0.2);
+            color: #64d2ff;
+            border: 1px solid rgba(100, 210, 255, 0.3);
+        }
+
+        .tag-nextyear {
+            background: rgba(255, 55, 95, 0.2);
+            color: #ff375f;
+            border: 1px solid rgba(255, 55, 95, 0.3);
+        }
+
+        .tag-passed {
+            background: rgba(142, 142, 147, 0.2);
+            color: #8e8e93;
+            border: 1px solid rgba(142, 142, 147, 0.3);
+        }
+
+        .list-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 80px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-state-text {
+            font-size: 17px;
+            opacity: 0.5;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(40px);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .category-option {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .category-option:active {
+            transform: scale(0.97);
+        }
+
+        .category-option.selected {
+            border-color: #667eea;
+            color: white;
+        }
+
+        .category-option.work.selected {
+            background: rgba(255, 149, 0, 0.2);
+            border-color: #ff9500;
+            color: #ff9500;
+        }
+
+        .category-option.personal.selected {
+            background: rgba(94, 92, 230, 0.2);
+            border-color: #5e5ce6;
+            color: #5e5ce6;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 10px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .filter-section {
+            margin-bottom: 14px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-chip.category-work.active {
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+        }
+
+        .filter-chip.category-personal.active {
+            background: linear-gradient(135deg, #5e5ce6 0%, #4c4ab8 100%);
+            box-shadow: 0 4px 12px rgba(94, 92, 230,
+                                        0.4);
+        }
+
+        .filter-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
+        }
     </style>
 </head>
 <body>
     <div class="background-gradient"></div>
+    
     <div class="container">
         <div class="header">
-            <h1>Countdown</h1>
-            <p>Your upcoming events</p>
-            <button class="history-btn" onclick="openHistory()">📚 <span class="history-badge" id="historyCount">0</span></button>
+            <div class="header-content">
+                <h1>Countdown</h1>
+                <p>Your upcoming events</p>
+            </div>
+            <button class="history-btn" onclick="openHistory()">
+                📚
+                <span class="history-badge" id="historyCount">0</span>
+            </button>
         </div>
+
+        <div class="stats-bar" id="statsBar"></div>
+
+        <div class="filter-section">
+            <div class="filter-chips">
+                <div class="filter-chip active" data-filter="all" onclick="applyFilter('all', this)">All</div>
+                <div class="filter-divider"></div>
+                <div class="filter-chip category-work" data-filter="work" onclick="applyFilter('work', this)">Work</div>
+                <div class="filter-chip category-personal" data-filter="personal" onclick="applyFilter('personal', this)">Personal</div>
+                <div class="filter-divider"></div>
+                <div class="filter-chip" data-filter="today" onclick="applyFilter('today', this)">Today</div>
+                <div class="filter-chip" data-filter="thisweek" onclick="applyFilter('thisweek', this)">This Week</div>
+                <div class="filter-chip" data-filter="thismonth" onclick="applyFilter('thismonth', this)">This Month</div>
+                <div class="filter-chip" data-filter="nextyear" onclick="applyFilter('nextyear', this)">Next Year</div>
+            </div>
+        </div>
+
         <div class="events-list" id="eventsList"></div>
     </div>
+
     <button class="add-event-btn" onclick="openModal()">+</button>
 
     <div class="history-screen" id="historyScreen">
         <div class="background-gradient"></div>
         <div class="history-header">
             <button class="back-btn" onclick="closeHistory()">←</button>
-            <div class="history-title">History</div>
-            <div style="width:50px"></div>
+            <div class="history-title">Event History</div>
+            <button class="clear-all-btn" onclick="clearAllHistory()">Clear All</button>
         </div>
         <div class="history-content">
             <div class="history-list" id="historyList"></div>
@@ -86,11 +981,27 @@
 
     <div class="modal" id="modal">
         <div class="modal-content">
-            <h2 class="modal-title">New Event</h2>
+            <h2 class="modal-title" id="modalTitle">New Event</h2>
             <form onsubmit="saveEvent(event)">
+                <input type="hidden" id="eventId">
                 <div class="form-group">
                     <label class="form-label">Event Name</label>
                     <input type="text" class="form-input" id="eventName" placeholder="Birthday Party" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date (Day 1)</label>
+                    <input type="date" class="form-input" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <div class="category-selector">
+                        <button type="button" class="category-option work selected" onclick="selectCategory('work')">
+                            💼 Work
+                        </button>
+                        <button type="button" class="category-option personal" onclick="selectCategory('personal')">
+                            ❤️ Personal
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Event Date</label>
@@ -98,7 +1009,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Add</button>
                 </div>
             </form>
         </div>
@@ -107,6 +1018,8 @@
     <script>
         let events = [];
         let historyEvents = [];
+        let selectedCategory = 'work';
+        let currentFilter = 'all';
 
         function loadEvents() {
             const stored = localStorage.getItem('countdownEvents');
@@ -126,82 +1039,6 @@
             document.getElementById('historyCount').textContent = historyEvents.length;
         }
 
-        function openModal() {
-            document.getElementById('modal').classList.add('active');
-            document.getElementById('eventDate').min = new Date().toISOString().split('T')[0];
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.getElementById('eventName').value = '';
-            document.getElementById('eventDate').value = '';
-        }
-
-        function saveEvent(e) {
-            e.preventDefault();
-            const name = document.getElementById('eventName').value;
-            const date = document.getElementById('eventDate').value;
-            events.push({ id: Date.now(), name, date });
-            saveEvents();
-            renderEvents();
-            closeModal();
-        }
-
-        function completeEvent(id) {
-            const event = events.find(e => e.id === id);
-            if (event && confirm('Mark as complete and move to history?')) {
-                historyEvents.push({ ...event, completedDate: new Date().toISOString() });
-                events = events.filter(e => e.id !== id);
-                saveEvents();
-                updateHistoryBadge();
-                renderEvents();
-            }
-        }
-
-        function calculateDays(dateStr) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const eventDate = new Date(dateStr);
-            eventDate.setHours(0, 0, 0, 0);
-            return Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
-        }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        function renderEvents() {
-            const container = document.getElementById('eventsList');
-            if (events.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No events yet<br>Tap + to add your first</div></div>';
-                return;
-            }
-
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            container.innerHTML = events.map(event => {
-                const days = calculateDays(event.date);
-                const isPassed = days < 0;
-                const displayDays = Math.abs(days);
-                const label = days === 0 ? 'today' : days === 1 ? 'day' : days === -1 ? 'day ago' : isPassed ? 'days ago' : 'days';
-                
-                return `
-                    <div class="list-card ${isPassed ? 'passed' : ''}">
-                        <div class="list-countdown">
-                            <div class="list-countdown-number ${isPassed ? 'passed' : ''}">${displayDays}</div>
-                            <div class="list-countdown-label">${label}</div>
-                        </div>
-                        <div class="list-content">
-                            <div class="list-title">${event.name}</div>
-                            <div class="list-date">${formatDate(event.date)}</div>
-                        </div>
-                        ${isPassed ? `<button class="action-btn complete" onclick="completeEvent(${event.id})">✓ Done</button>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
         function openHistory() {
             document.getElementById('historyScreen').classList.add('active');
             renderHistory();
@@ -212,26 +1049,265 @@
         }
 
         function renderHistory() {
-            const container = document.getElementById('historyList');
+            const historyList = document.getElementById('historyList');
             if (historyEvents.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No completed events</div></div>';
+                historyList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No past events yet<br>Completed events will appear here</div></div>';
                 return;
             }
-
-            const sorted = [...historyEvents].sort((a, b) => new Date(b.completedDate) - new Date(a.completedDate));
-            container.innerHTML = sorted.map(event => `
-                <div class="history-card">
-                    <div style="font-size:24px;opacity:0.5">✓</div>
-                    <div class="history-info">
-                        <div class="history-name">${event.name}</div>
-                        <div class="history-date">${formatDate(event.date)}</div>
-                    </div>
-                </div>
-            `).join('');
+            const sortedHistory = [...historyEvents].sort((a, b) => new Date(b.date) - new Date(a.date));
+            historyList.innerHTML = sortedHistory.map(event => {
+                const daysAgo = Math.abs(calculateDaysRemaining(event.date));
+                const category = event.category || 'work';
+                return `<div class="history-card"><div class="history-icon">✓</div><div class="history-info"><div class="history-name">${event.name}</div><div class="history-date">${formatDate(event.date)} • ${category}</div></div><div class="history-days">${daysAgo}d ago</div><button class="history-delete-btn" onclick="deleteHistoryEvent(${event.id})">×</button></div>`;
+            }).join('');
         }
 
-        document.getElementById('modal').addEventListener('click', (e) => {
+        function deleteHistoryEvent(id) {
+            if (confirm('Delete this event from history?')) {
+                historyEvents = historyEvents.filter(e => e.id !== id);
+                saveEvents();
+                updateHistoryBadge();
+                renderHistory();
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm('Clear all history? This cannot be undone.')) {
+                historyEvents = [];
+                saveEvents();
+                updateHistoryBadge();
+                renderHistory();
+            }
+        }
+
+        function applyFilter(filter, element) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            element.classList.add('active');
+            renderEvents();
+        }
+
+        function filterEvents(eventsList) {
+            if (currentFilter === 'all') return eventsList;
+            return eventsList.filter(event => {
+                const daysRemaining = calculateDaysRemaining(event.date);
+                const category = event.category || 'work';
+                if (currentFilter === 'work' || currentFilter === 'personal') return category === currentFilter;
+                if (currentFilter === 'today') return daysRemaining === 0;
+                if (currentFilter === 'thisweek') return daysRemaining > 0 && daysRemaining <= 7;
+                if (currentFilter === 'thismonth') {
+                    const today = new Date();
+                    const eventDate = new Date(event.date);
+                    return eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear();
+                }
+                if (currentFilter === 'nextyear') {
+                    const today = new Date();
+                    const eventDate = new Date(event.date);
+                    return eventDate.getFullYear() === today.getFullYear() + 1;
+                }
+                return true;
+            });
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-option').forEach(btn => btn.classList.remove('selected'));
+            document.querySelector(`.category-option.${category}`).classList.add('selected');
+        }
+
+        function openModal() {
+            document.getElementById('modal').classList.add('active');
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('startDate').max = today;
+            document.getElementById('eventDate').min = today;
+            document.getElementById('modalTitle').textContent = 'New Event';
+            document.getElementById('saveBtn').textContent = 'Add';
+            document.getElementById('eventId').value = '';
+            document.getElementById('eventName').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('eventDate').value = '';
+            selectedCategory = 'work';
+            selectCategory('work');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function editEvent(id) {
+            const event = events.find(e => e.id === id);
+            if (!event) return;
+            document.getElementById('eventId').value = event.id;
+            document.getElementById('eventName').value = event.name;
+            document.getElementById('startDate').value = event.startDate || new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('modalTitle').textContent = 'Edit Event';
+            document.getElementById('saveBtn').textContent = 'Save';
+            selectedCategory = event.category || 'work';
+            selectCategory(selectedCategory);
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function saveEvent(e) {
+            e.preventDefault();
+            const id = document.getElementById('eventId').value;
+            const name = document.getElementById('eventName').value;
+            const startDate = document.getElementById('startDate').value;
+            const date = document.getElementById('eventDate').value;
+            if (id) {
+                const index = events.findIndex(e => e.id === parseInt(id));
+                if (index !== -1) {
+                    events[index].name = name;
+                    events[index].startDate = startDate;
+                    events[index].date = date;
+                    events[index].category = selectedCategory;
+                }
+            } else {
+                events.push({id: Date.now(), name, startDate, date, category: selectedCategory});
+            }
+            saveEvents();
+            renderEvents();
+            closeModal();
+        }
+
+        function deleteEvent(id) {
+            if (confirm('Delete this event?')) {
+                events = events.filter(e => e.id !== id);
+                saveEvents();
+                renderEvents();
+            }
+        }
+
+        function toggleMenu(id, event) {
+            event.stopPropagation();
+            const card = document.querySelector(`[data-event-id="${id}"]`);
+            const allCards = document.querySelectorAll('.list-card');
+            allCards.forEach(c => { if (c !== card) c.classList.remove('menu-open'); });
+            card.classList.toggle('menu-open');
+        }
+
+        function closeAllMenus() {
+            document.querySelectorAll('.list-card').forEach(card => card.classList.remove('menu-open'));
+        }
+
+        function calculateDaysRemaining(dateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const eventDate = new Date(dateStr);
+            eventDate.setHours(0, 0, 0, 0);
+            return Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatCountdown(days) {
+            const absDays = Math.abs(days);
+            if (absDays <= 30) return {number: absDays, label: absDays === 1 ? 'day' : 'days'};
+            const months = Math.floor(absDays / 30);
+            const remainingDays = absDays % 30;
+            if (remainingDays === 0) return {number: months, label: months === 1 ? 'month' : 'months'};
+            return {number: `${months}m ${remainingDays}d`, label: ''};
+        }
+
+        function calculateProgress(startDateStr, eventDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startDate = new Date(startDateStr);
+            startDate.setHours(0, 0, 0, 0);
+            const eventDate = new Date(eventDateStr);
+            eventDate.setHours(0, 0, 0, 0);
+            const totalDays = Math.ceil((eventDate - startDate) / (1000 * 60 * 60 * 24));
+            const daysPassed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+            let percentage = 0;
+            if (totalDays > 0) percentage = Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
+            let colorClass = 'progress-upcoming';
+            if (percentage >= 100) colorClass = 'progress-passed';
+            else if (percentage >= 90) colorClass = 'progress-today';
+            else if (percentage >= 70) colorClass = 'progress-soon';
+            return {percentage: Math.round(percentage), class: colorClass};
+        }
+
+        function getTimeTag(dateStr) {
+            const daysRemaining = calculateDaysRemaining(dateStr);
+            if (daysRemaining < 0) return {text: 'Passed', class: 'tag-passed'};
+            if (daysRemaining === 0) return {text: 'Today', class: 'tag-today'};
+            if (daysRemaining <= 7) return {text: 'This Week', class: 'tag-thisweek'};
+            const today = new Date();
+            const eventDate = new Date(dateStr);
+            if (eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear()) return {text: 'This Month', class: 'tag-thismonth'};
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const monthAfterNext = new Date(today.getFullYear(), today.getMonth() + 2, 1);
+            if (eventDate >= nextMonth && eventDate < monthAfterNext) return {text: 'Next Month', class: 'tag-nextmonth'};
+            if (eventDate.getFullYear() === today.getFullYear()) return {text: 'This Year', class: 'tag-thisyear'};
+            if (eventDate.getFullYear() === today.getFullYear() + 1) return {text: 'Next Year', class: 'tag-nextyear'};
+            const yearDiff = eventDate.getFullYear() - today.getFullYear();
+            return {text: `${yearDiff} Years`, class: 'tag-nextyear'};
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+        }
+
+        function renderStats() {
+            const todayCount = events.filter(e => calculateDaysRemaining(e.date) === 0).length;
+            const next7Days = events.filter(e => {
+                const days = calculateDaysRemaining(e.date);
+                return days > 0 && days <= 7;
+            }).length;
+            const next30Days = events.filter(e => {
+                const days = calculateDaysRemaining(e.date);
+                return days > 0 && days <= 30;
+            }).length;
+            const statsBar = document.getElementById('statsBar');
+            if (events.length === 0) {
+                statsBar.innerHTML = '';
+                return;
+            }
+            statsBar.innerHTML = `<div class="stat-card"><div class="stat-number">${todayCount}</div><div class="stat-label">Today</div></div><div class="stat-card"><div class="stat-number">${next7Days}</div><div class="stat-label">Next 7 Days</div></div><div class="stat-card"><div class="stat-number">${next30Days}</div><div class="stat-label">Next 30 Days</div></div>`;
+        }
+
+        function renderEvents() {
+            renderStats();
+            const listContainer = document.getElementById('eventsList');
+            if (events.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No events yet<br>Tap below to add your first</div></div>';
+                return;
+            }
+            const filteredEvents = filterEvents(events);
+            if (filteredEvents.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No events match this filter<br>Try a different selection</div></div>';
+                return;
+            }
+            filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            listContainer.innerHTML = filteredEvents.map(event => {
+                const daysRemaining = calculateDaysRemaining(event.date);
+                const formatted = formatCountdown(daysRemaining);
+                const countdownNumber = formatted.number;
+                const countdownText = formatted.label;
+                const category = event.category || 'work';
+                const categoryClass = `category-${category}`;
+                const timeTag = getTimeTag(event.date);
+                const startDate = event.startDate || event.date;
+                const progress = calculateProgress(startDate, event.date);
+                let pulseClass = '';
+                let glowElement = '';
+                if (daysRemaining === 0) {
+                    pulseClass = 'pulse-today';
+                    glowElement = '<div class="card-glow-today"></div>';
+                } else if (daysRemaining > 0 && daysRemaining <= 7) {
+                    pulseClass = 'pulse-thisweek';
+                    glowElement = '<div class="card-glow-thisweek"></div>';
+                }
+                return `<div class="list-card ${pulseClass}" data-event-id="${event.id}">${glowElement}<button class="menu-trigger" onclick="toggleMenu(${event.id}, event)">⋯</button><div class="card-overlay"><button class="overlay-btn edit" onclick="editEvent(${event.id}); closeAllMenus();">Edit</button><button class="overlay-btn delete" onclick="deleteEvent(${event.id}); closeAllMenus();">Delete</button></div><div class="card-main-content"><div class="list-countdown"><div class="list-countdown-number">${countdownNumber}</div><div class="list-countdown-label">${countdownText}</div></div><div class="list-content"><div><span class="event-category ${categoryClass}">${category}</span><span class="time-tag ${timeTag.class}">${timeTag.text}</span></div><div class="list-title">${event.name}</div><div class="list-date">${formatDate(event.date)}</div></div></div><div class="progress-bar-container"><div class="progress-bar ${progress.class}" style="width: ${progress.percentage}%"></div><div class="progress-percentage">${progress.percentage}%</div></div></div>`;
+            }).join('');
+        }
+
+        document.getElementById('modal').addEventListener('click', e => {
             if (e.target.id === 'modal') closeModal();
+        });
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.list-card') && !e.target.closest('.menu-trigger')) closeAllMenus();
         });
 
         loadEvents();
