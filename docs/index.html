@@ -458,7 +458,8 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('startDate').max = today;
-            document.getElementById('eventDate').min = today;
+            // Remove date validation to allow past dates for testing
+            document.getElementById('eventDate').removeAttribute('min');
             document.getElementById('modalTitle').textContent = 'New Event';
             document.getElementById('saveBtn').textContent = 'Add';
             document.getElementById('eventId').value = '';
@@ -548,9 +549,12 @@
         function calculateDaysRemaining(dateStr) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const eventDate = new Date(dateStr);
+            const eventDate = new Date(dateStr + 'T00:00:00'); // Force local timezone
             eventDate.setHours(0, 0, 0, 0);
-            return Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+            const diffMs = eventDate - today;
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            console.log('Event date:', dateStr, 'Days remaining:', diffDays); // Debug log
+            return diffDays;
         }
 
         function formatCountdown(days) {
